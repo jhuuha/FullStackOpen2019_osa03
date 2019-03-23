@@ -29,14 +29,17 @@ let persons = [
 
 const generateId = () => Math.floor(Math.random() * 65534) + 1
 
+//info
 app.get('/info', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>info</title></head><body><h3>Puhelinluettelossa ${persons.length} henkilön tiedot</h3><h3>${new Date().toString()}</h3></body></html>`)
 })
 
+//hakee kokoelman kaikki resurssit
 app.get('/api/persons', (req, res) => {
     res.json(persons)
 })
 
+//hakee yksittäisen resurssin
 app.get('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
     const person = persons.find(n => n.id === id)
@@ -47,18 +50,40 @@ app.get('/api/persons/:id', (req, res) => {
     }
 })
 
+//luo uuden resurssin pyynnön mukana olavasta datasta
 app.post('/api/persons', (req, res) => {
-    const person = req.body
-    person.id = generateId()
+    const body = req.body
+    if (!body.name) {
+        return res.status(400).json({
+            error: 'name missing'
+        })
+    }
+    if (!body.number) {
+        return res.status(400).json({
+            error: 'number missing'
+        })
+    }
+    if (persons.find(n => n.name === body.name)) {
+        return res.status(400).json({
+            error: 'name must be unique'
+        })
+    }
+    const person = {
+        id: generateId(),
+        name: body.name,
+        number: body.number
+    }
     persons = persons.concat(person)
     res.json(person)
 })
 
+//poistaa yksilöidyn resussin
 app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id);
     persons = persons.filter(n => n.id !== id);
     res.status(204).end();
 });
+
 
 const PORT = 3001
 app.listen(PORT, () => {
