@@ -24,6 +24,9 @@ let persons = [
     },
 ]
 
+app.get('/info', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>info</title></head><body><h3>Puhelinluettelossa ${persons.length} henkilön tiedot</h3><h3>${new Date().toString()}</h3></body></html>`)
+})
 
 app.get('/api/persons', (req, res) => {
     res.json(persons)
