@@ -1,5 +1,8 @@
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
+
+app.use(bodyParser.json())
 
 let persons = [
     {
@@ -24,6 +27,8 @@ let persons = [
     },
 ]
 
+const generateId = () => Math.floor(Math.random() * 65534) + 1
+
 app.get('/info', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>info</title></head><body><h3>Puhelinluettelossa ${persons.length} henkilön tiedot</h3><h3>${new Date().toString()}</h3></body></html>`)
 })
@@ -40,6 +45,13 @@ app.get('/api/persons/:id', (req, res) => {
     } else {
         res.status(404).end()
     }
+})
+
+app.post('/api/persons', (req, res) => {
+    const person = req.body
+    person.id = generateId()
+    persons = persons.concat(person)
+    res.json(person)
 })
 
 app.delete('/api/persons/:id', (req, res) => {
