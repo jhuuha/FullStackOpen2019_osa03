@@ -4,7 +4,8 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 
 app.use(bodyParser.json())
-app.use(morgan('tiny'))
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 let persons = [
     {
@@ -31,6 +32,8 @@ let persons = [
 
 const generateId = () => Math.floor(Math.random() * 65534) + 1
 
+morgan.token('data', (req, res) => req.method === 'POST' ? JSON.stringify(req.body) : ' ')
+
 //info
 app.get('/info', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>info</title></head><body><h3>Puhelinluettelossa ${persons.length} henkilön tiedot</h3><h3>${new Date().toString()}</h3></body></html>`)
@@ -54,7 +57,9 @@ app.get('/api/persons/:id', (req, res) => {
 
 //luo uuden resurssin pyynnön mukana olavasta datasta
 app.post('/api/persons', (req, res) => {
+
     const body = req.body
+
     if (!body.name) {
         return res.status(400).json({
             error: 'name missing'
@@ -85,6 +90,12 @@ app.delete('/api/persons/:id', (req, res) => {
     persons = persons.filter(n => n.id !== id);
     res.status(204).end();
 });
+
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).end()
+}
+app.use(unknownEndpoint)
 
 
 const PORT = 3001
