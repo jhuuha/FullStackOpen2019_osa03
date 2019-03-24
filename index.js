@@ -11,34 +11,15 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "045-1236543",
-    },
-    {
-        "id": 2,
-        "name": "Arto Järvinen",
-        "number": "041-21423123",
-    },
-    {
-        "id": 3,
-        "name": "Lea Kutvonen",
-        "number": "040-4323234",
-    },
-    {
-        "id": 4,
-        "name": "Martti Tienari",
-        "number": "09-784232",
-    },
-]
-
 morgan.token('data', (req, res) => req.method === 'POST' ? JSON.stringify(req.body) : ' ')
 
 //info
-app.get('/info', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>info</title></head><body><h3>Puhelinluettelossa ${persons.length} henkilön tiedot</h3><h3>${new Date().toString()}</h3></body></html>`)
+app.get('/info', (req, res, next) => {
+    Person.countDocuments({})
+        .then(count => {
+            res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>info</title></head><body><h3>Puhelinluettelossa ${count} henkilön tiedot</h3><h3>${new Date().toString()}</h3></body></html>`)
+        })
+        .catch(error => next(error))
 })
 
 //hakee kokoelman kaikki resurssit
@@ -51,14 +32,16 @@ app.get('/api/persons', (req, res, next) => {
 })
 
 //hakee yksittäisen resurssin
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(n => n.id === id)
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+app.get('/api/persons/:id', (req, res, next) => {
+    Person.findById(req.params.id)
+        .then(person => {
+            if (person) {
+                res.json(person.toJSON())
+            } else {
+                res.status(204).end()
+            }
+        })
+        .catch(error => next(error))
 })
 
 //luo uuden resurssin pyynnön mukana olavasta datasta
@@ -76,11 +59,15 @@ app.post('/api/persons', (req, res, next) => {
             error: 'number missing'
         })
     }
+
+    /*
     if (persons.find(n => n.name === body.name)) {
         return res.status(400).json({
             error: 'name must be unique'
         })
     }
+    */
+
     const person = new Person({
         name: body.name,
         number: body.number
