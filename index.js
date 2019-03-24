@@ -34,8 +34,6 @@ let persons = [
     },
 ]
 
-const generateId = () => Math.floor(Math.random() * 65534) + 1
-
 morgan.token('data', (req, res) => req.method === 'POST' ? JSON.stringify(req.body) : ' ')
 
 //info
@@ -81,13 +79,13 @@ app.post('/api/persons', (req, res) => {
             error: 'name must be unique'
         })
     }
-    const person = {
-        id: generateId(),
+    const person = new Person({
         name: body.name,
         number: body.number
-    }
-    persons = persons.concat(person)
-    res.json(person)
+    })
+    person.save().then(savedPerson => {
+        res.json(savedPerson.toJSON())
+    })
 })
 
 //poistaa yksilöidyn resussin
