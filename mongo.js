@@ -22,7 +22,7 @@ const Person = mongoose.model('Person', personSchema)
 if (process.argv.length === 3) {
     //tulostus
     Person.find({}).then(result => {
-        console.log(`puhelinluettelo:`)
+        console.log('puhelinluettelo:')
         result.forEach(person => {
             console.log(`${person.name} ${person.number}`)
         })
@@ -35,8 +35,8 @@ if (process.argv.length === 3) {
         number: process.argv[4].toString(),
     })
     person.save().then(response => {
-        console.log(`lisätään ${person.name} numero ${person.number} luetteloon`);
-        mongoose.connection.close();
+        console.log(`lisätään ${person.name} numero ${person.number} luetteloon`)
+        mongoose.connection.close()
     })
 } else {
     console.log('give password, new new and new number as arguments')
