@@ -92,6 +92,20 @@ app.post('/api/persons', (req, res, next) => {
         .catch(error => next(error))
 })
 
+//päivittää yksilöidyn resurssin
+app.put('/api/persons/:id', (req, res, next) => {
+    const body = req.body
+    const person = {
+        name: body.name,
+        number: body.number,
+    }
+    Person.findByIdAndUpdate(req.params.id, person, { new: true })
+        .then(updatedPerson => {
+            res.json(updatedPerson.toJSON())
+        })
+        .catch(error => next(error))
+})
+
 //poistaa yksilöidyn resussin
 app.delete('/api/persons/:id', (req, res, next) => {
     Person.findByIdAndRemove(req.params.id)
